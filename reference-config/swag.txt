@@ -1,0 +1,23 @@
+version: "2.2"
+services:
+  swag:
+    image: ghcr.io/linuxserver/swag
+    container_name: swag
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=1001
+      - PGID=100
+      - URL=mynasku.duckdns.org
+      - DUCKDNSTOKEN=c711e9b9-1d16-4acd-aff1-383007697117
+      - SUBDOMAINS=wildcard
+      - VALIDATION=duckdns
+      - EMAIL=annasalfarisi@gmail.com
+      - DOCKER_MODS=linuxserver/mods:swag-dashboard
+    volumes:
+      - /srv/dev-disk-by-uuid-07417860-ef43-475d-9df1-6f17738cd20d/appdata/swag/config:/config
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 443:443
+      - 81:80
+    restart: unless-stopped

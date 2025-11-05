@@ -1,0 +1,70 @@
+version: "3.8"
+
+services:
+  nextcloud:
+    image: lscr.io/linuxserver/nextcloud:latest
+    container_name: nextcloud
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Jakarta
+    volumes:
+      - /srv/dev-disk-by-label-storage/nextcloud/config:/config
+      - /srv/dev-disk-by-label-storage/nextcloud/data:/data
+    ports:
+      - "443:443"
+    depends_on:
+      - mariadb
+    restart: unless-stopped
+
+  mariadb:
+    image: lscr.io/linuxserver/mariadb:latest
+    container_name: mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=example_root_pass
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nc_user
+      - MYSQL_PASSWORD=example_pass
+    volumes:
+      - /srv/dev-disk-by-label-storage/mariadb:/config
+    restart: unless-stopped
+
+  duckdns:
+    image: lscr.io/linuxserver/duckdns:latest
+    container_name: duckdns
+    environment:
+      - SUBDOMAINS=ptxyznas
+      - TOKEN=your_duckdns_token
+      - TZ=Asia/Jakarta
+    restart: unless-stopped
+
+  swag:
+    image: lscr.io/linuxserver/swag:latest
+    container_name: swag
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - URL=ptxyznas.duckdns.org
+      - VALIDATION=duckdns
+      - DUCKDNSTOKEN=your_duckdns_token
+      - TZ=Asia/Jakarta
+    volumes:
+      - /srv/dev-disk-by-label-storage/swag:/config
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    command: -H unix:///var/run/docker.sock
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    restart: unless-stopped
+
+volumes:
+  portainer_data:
